@@ -1,79 +1,158 @@
+@font-face {
+  font-family: 'Beaufort';
+  src: url('/src/assets/BeaufortforLOL-Medium.otf');
+}
+
+@font-face {
+  font-family: 'Spiegel';
+  src: url('/src/assets/Spiegel-Regular.otf');
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --blue1: #CDFAFA;
+  --blue2: #0AC8B9;
+  --blue3: #0397AB;
+  --blue4: #005A82;
+  --blue5: #0A323C;
+  --blue6: #091428;
+  --blue7: #0A1428;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --gold1: #F0E6D2;
+  --gold2: #C8AA6E;
+  --gold3: #C89B3C;
+  --gold4: #785A28;
+  --gold5: #463714;
+  --gold6: #32281E;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --grey1: #A09B8C;
+  --grey2: #5B5A56;
+  --grey3: #3C3C41;
+  --grey4: #1E2328;
+  --grey5: #1E282D;
+  --black: #010A13;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  font-family: Beaufort;
+  font-size: 1rem;
+  color: #fff;
 }
 
-body {
+html,
+body,
+#app,
+main {
+  height: 100%;
+  width: 100%;
   margin: 0;
+  background-image: linear-gradient(var(--blue7), var(--blue6));
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+main {
+  gap: 0.5rem;
+  padding: 0.5rem;
 }
 
-.card {
-  padding: 2em;
+div {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.container {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-areas: "top top"
+    "mid right"
+    "bot right";
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 100px 1fr 100px;
+}
+
+.container>div {
+  border: 1px solid hsl(46, 38%, 68%);
+}
+
+.top {
+  grid-area: top;
+  justify-content: center;
+}
+
+.mid {
+  grid-area: mid;
+}
+
+.right {
+  grid-area: right;
+}
+
+.bot {
+  grid-area: bot;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  height: 40px;
+  width: 120px;
+  background-color: var(--blue4);
+  border: solid 1px var(--blue3);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  background-color: var(--blue3);
+  border: solid 2px var(--blue1);
+
+}
+
+button:active {
+  background-color: var(--blue5);
+  border: solid 2px var(--gold2);
+}
+
+button:disabled {
+  background-color: var(--grey2);
+  border: solid 2px var(--gold4);
+}
+
+button:disabled:hover {
+  background-color: var(--grey2);
+  border: solid 4px var(--gold4);
+}
+
+button:disabled:active {
+  background-color: var(--grey4);
+  border: solid 2px var(--gold4);
+}
+
+input {
+  background-color: var(--black);
+  outline-color: var(--gold2);
+  box-shadow: none;
+  border: solid 1px var(--gold2);
+  color: var(--gold1);
+  width: 200px;
+  height: 30px;
+  margin: .25rem;
+}
+
+input:focus {
+  background-color: var(--blue5);
+  outline: solid;
+  outline-width: 2px;
+  outline-color: var(--gold3);
+  border: solid 1px var(--gold2);
+}
+
+.testCard {
+  background-color: goldenrod;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  align-items: center;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
 }
