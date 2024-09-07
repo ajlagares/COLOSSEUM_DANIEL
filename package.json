@@ -14,7 +14,9 @@
     "vite": "^5.4.1"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "firebase": "^10.13.1",
-    "posthog-js": "^1.160.3"
+    "posthog-js": "^1.160.3",
+    "puppeteer": "^23.3.0"
   }
 }

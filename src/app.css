@@ -127,7 +127,7 @@ button:disabled:active {
   border: solid 2px var(--gold4);
 }
 
-input {
+input ,select {
   background-color: var(--black);
   outline-color: var(--gold2);
   box-shadow: none;

@@ -40,7 +40,27 @@
   function fetchGameData() {}
 
   function verifyBetData() {}
-</script>
+  //https://www.leagueofgraphs.com/summoner/na/kim%20dong%20dan-na1
+  let testurl = "https://helloworld-xxvante5sa-uc.a.run.app";
+  async function triggerScrape() {
+    try {
+      // Send a GET request to the Cloud Function
+      const response = await fetch(testurl);
+
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Log or use the scraped data
+      console.log('Scraped data:', data);
+    } catch (error) {
+      console.error('Error triggering scrape:', error);
+    }
+  }</script>
 
 <main>
   <div class="container">
@@ -51,6 +71,9 @@
       {#if user === null}
         <img style="height:70px; width:140px;" /><button
           on:click={loginWithGoogle}>Log in</button
+        >
+        <button
+          on:click={triggerScrape}>triggerScrape</button
         >
       {:else}
         you are logged in!
@@ -85,7 +108,7 @@
           class="summoningRow2"
           style="background-color: var(--blue5);  align-items:center;"
         >
-          <p>Select a summoner:</p>
+          <p style="font-size:1.8rem;">Select a summoner:</p>
           <div style="flex-direction: row; align-items:center;">
             <input
               type="text"
@@ -94,44 +117,30 @@
             />
           </div>
           <div style="flex-direction: row; align-items:center;">
-           
-            <select name="region" id="regionSelector" bind:value={summonerRegion}>
-              <option value="na">North Amnerica</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              <option value="na">NA</option>
-              BR
-              EUNE
-              EUW
-              JP
-              KR
-              LAN
-              LAS
-              ME
-              NA
-              OCE
-              RU
-              TR
-              PH
-              SG
-              TH
-              TW
-              VN
+            <select
+              name="region"
+              id="regionSelector"
+              placeholder="summonerRegion"
+              bind:value={summonerRegion}
+            >
+              <option value="na">North America</option>
+              <option value="lan">Latin America North</option>
+              <option value="las">Latin America South</option>
+              <option value="br">Brazil</option>
+              <option value="euw">Europe West</option>
+              <option value="eune">Europe Nordic & East</option>
+              <option value="ru">Russia</option>
+              <option value="tr">Turkey</option>
+              <option value="me">Middle East</option>
+              <option value="oce">Oceania</option>
+              <option value="jp">Japan</option>
+              <option value="kr">Republic of Korea</option>
+              <option value="ph">The Philippines </option>
+              <option value="sg">Singapore, Malaysia, & Indonesia</option>
+              <option value="tw">Taiwan, Hong Kong, and Macao </option>
+              <option value="th">Thailand</option>
+              <option value="vn">Vietnam</option>
             </select>
-
           </div>
           <div style="flex-direction: row; align-items:center;">
             <input
@@ -141,18 +150,24 @@
             />
           </div>
 
-          <div style="flex-direction: row; align-items:center;">
-            <p>
+          <div
+            style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
+          >
+            <button
+              style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center;"
+            >
+              <p style="margin:0px;">Verify Summoner</p>
+              <div
+                style="background-color:red; width:10px; height:10px; border-radius:100px; margin:0.6rem;"
+              ></div>
+            </button>
+            <!-- <p>
               <a
                 target="_blank"
                 href="https://www.leagueofgraphs.com/summoner/{summonerRegion}/{summonerNameWithSpaces}-{summonerTag}"
                 >Summoner Not found</a
               >
-            </p>
-
-            <div
-              style="background-color:red; width:20px; height:20px; border-radius:100px; margin:0.5rem;"
-            ></div>
+            </p> -->
           </div>
           <input type="number" placeholder="Bet amount" />
           <br />
