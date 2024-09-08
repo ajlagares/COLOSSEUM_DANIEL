@@ -36,31 +36,24 @@
   let summonerRegion = "";
   let summonerTag = "";
   let midStatus = "normal";
-  let loggedInStatus = 2;
-  function fetchGameData() {}
+  let mergedURL =
+    "https://www.leagueofgraphs.com/summoner/" +
+    summonerRegion +
+    "/" +
+    summonerNameWithSpaces +
+    "-" +
+    summonerTag;
 
-  function verifyBetData() {}
-  //https://www.leagueofgraphs.com/summoner/na/kim%20dong%20dan-na1
-  let testurl = "https://helloworld-xxvante5sa-uc.a.run.app";
-  async function triggerScrape() {
-    try {
-      // Send a GET request to the Cloud Function
-      const response = await fetch(testurl);
+    //https://scrapedata-xxvante5sa-uc.a.run.app/
+  async function searchForSummoner(){
+    console.log("searching")
+    fetch(mergedURL, {
+      
+    })
+    
+  }
 
-      // Check if the response is OK
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
-      // Parse the JSON response
-      const data = await response.json();
-
-      // Log or use the scraped data
-      console.log('Scraped data:', data);
-    } catch (error) {
-      console.error('Error triggering scrape:', error);
-    }
-  }</script>
+</script>
 
 <main>
   <div class="container">
@@ -72,9 +65,7 @@
         <img style="height:70px; width:140px;" /><button
           on:click={loginWithGoogle}>Log in</button
         >
-        <button
-          on:click={triggerScrape}>triggerScrape</button
-        >
+        <button on:click={searchForSummoner}>triggerScrape</button>
       {:else}
         you are logged in!
       {/if}
