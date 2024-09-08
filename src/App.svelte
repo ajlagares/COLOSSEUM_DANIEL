@@ -19,7 +19,10 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   const functions = getFunctions(app);
+  const getSummonerData = httpsCallable(functions, "getSummonerData");
+  let lastSummonerData = null;
   let user = null;
+  
   async function loginWithGoogle() {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -36,7 +39,7 @@
   let summonerRegion = "";
   let summonerTag = "";
   let midStatus = "normal";
-  let mergedURL =
+  $:mergedURL =
     "https://www.leagueofgraphs.com/summoner/" +
     summonerRegion +
     "/" +
@@ -46,19 +49,10 @@
 
   //https://scrapedata-xxvante5sa-uc.a.run.app/
 
-  let message = "Nothing yet";
-  let name = "Svelte";
 
-  async function searchForSummoner() {
-    try {
-      const response = await fetch(
-        `https://scrapedata-xxvante5sa-uc.a.run.app/?name=${encodeURIComponent(name)}`,
-      );
-      message = await response.text();
-    } catch (error) {
-      console.error("Error calling function:", error);
-      message = "Error calling function";
-    }
+  function hideSpinner(){
+    const element = document.getElementById("spinner");
+      element.style.display = "none";
   }
 </script>
 
@@ -72,7 +66,6 @@
         <img style="height:70px; width:140px;" /><button
           on:click={loginWithGoogle}>Log in</button
         >
-        <button on:click={searchForSummoner}>triggerScrape</button> {message}
       {:else}
         you are logged in!
       {/if}
@@ -152,12 +145,24 @@
             style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
           >
             <button
-              style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center;"
+              style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center; gap:1rem;"
+              on:click={() => {
+                console.log(mergedURL)
+                const element = document.getElementById("spinner");
+                element.style.display = "flex";
+                getSummonerData({ text: mergedURL }).then((result) => {
+                  /** @type {any} */
+                  lastSummonerData = result.data;
+                  console.log(lastSummonerData);
+                });
+              }}
             >
               <p style="margin:0px;">Verify Summoner</p>
               <div
-                style="background-color:red; width:10px; height:10px; border-radius:100px; margin:0.6rem;"
-              ></div>
+                style="background-color:red; width:10px; height:10px; border-radius:100px; flex-direction:column; "
+              >
+                <span style="display: none; height:30px; width:30px;" id="spinner" class="loader"></span>
+              </div>
             </button>
             <!-- <p>
               <a
