@@ -44,15 +44,22 @@
     "-" +
     summonerTag;
 
-    //https://scrapedata-xxvante5sa-uc.a.run.app/
-  async function searchForSummoner(){
-    console.log("searching")
-    fetch(mergedURL, {
-      
-    })
-    
-  }
+  //https://scrapedata-xxvante5sa-uc.a.run.app/
 
+  let message = "Nothing yet";
+  let name = "Svelte";
+
+  async function searchForSummoner() {
+    try {
+      const response = await fetch(
+        `https://scrapedata-xxvante5sa-uc.a.run.app/?name=${encodeURIComponent(name)}`,
+      );
+      message = await response.text();
+    } catch (error) {
+      console.error("Error calling function:", error);
+      message = "Error calling function";
+    }
+  }
 </script>
 
 <main>
@@ -65,7 +72,7 @@
         <img style="height:70px; width:140px;" /><button
           on:click={loginWithGoogle}>Log in</button
         >
-        <button on:click={searchForSummoner}>triggerScrape</button>
+        <button on:click={searchForSummoner}>triggerScrape</button> {message}
       {:else}
         you are logged in!
       {/if}
@@ -162,7 +169,7 @@
           </div>
           <input type="number" placeholder="Bet amount" />
           <br />
-          <button on:click={verifyBetData} disabled>Submit Bet</button>
+          <button disabled>Submit Bet</button>
           <br />
         </div>
 
