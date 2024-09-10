@@ -115,6 +115,7 @@ button:active {
 button:disabled {
   background-color: var(--grey2);
   border: solid 2px var(--gold4);
+  color: var(--grey1);
 }
 
 button:disabled:hover {
@@ -144,6 +145,14 @@ input:focus {
   outline-width: 2px;
   outline-color: var(--gold3);
   border: solid 1px var(--gold2);
+}
+
+input:disabled , select:disabled{
+  background-color: var(--grey1);
+  outline: solid;
+  outline-width: 1px;
+  outline-color: var(--gold3);
+  border: solid 1px var(--grey2);
 }
 
 .testCard {

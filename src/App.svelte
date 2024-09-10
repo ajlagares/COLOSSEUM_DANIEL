@@ -4,6 +4,8 @@
   import { initializeApp } from "firebase/app";
   import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
   import { getFunctions, httpsCallable } from "firebase/functions";
+  import logo from "./assets/colosseumLogo.svg";
+  import { onMount } from "svelte";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCcUIXPORf5C_PEDsTYPadaTgGtzSky7kY",
@@ -22,7 +24,7 @@
   const getSummonerData = httpsCallable(functions, "getSummonerData");
   let lastSummonerData = null;
   let user = null;
-  
+
   async function loginWithGoogle() {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -33,13 +35,15 @@
     }
   }
   //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  let utcTime = "";
 
   let summonerName = "";
   $: summonerNameWithSpaces = summonerName.replace(/ /g, "%20");
   let summonerRegion = "";
   let summonerTag = "";
   let midStatus = "normal";
-  $:mergedURL =
+  let summonerSearchDisable = false;
+  $: mergedURL =
     "https://www.leagueofgraphs.com/summoner/" +
     summonerRegion +
     "/" +
@@ -49,11 +53,26 @@
 
   //https://scrapedata-xxvante5sa-uc.a.run.app/
 
+  function updateUTCTime() {
+    const now = new Date();
+    // Format the time including milliseconds (HH:MM:SS:ms)
+    const hours = String(now.getUTCHours()).padStart(2, "0");
+    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+    const milliseconds = String(now.getUTCMilliseconds()).padStart(3, "0"); // Pads to 3 digits
 
-  function hideSpinner(){
-    const element = document.getElementById("spinner");
-      element.style.display = "none";
+    // Combine to form the full time string
+    utcTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
+
+  onMount(() => {
+    updateUTCTime(); // Initial call to display immediately
+    // Update the time every 50 milliseconds for smooth display of ms
+    const interval = setInterval(updateUTCTime, 50);
+
+    // Cleanup function to clear the interval when the component is destroyed
+    return () => clearInterval(interval);
+  });
 </script>
 
 <main>
@@ -63,9 +82,9 @@
       style="flex-direction:row; justify-content: space-between; align-items:center; padding:0.5rem;"
     >
       {#if user === null}
-        <img style="height:70px; width:140px;" /><button
-          on:click={loginWithGoogle}>Log in</button
-        >
+        <img alt="Logo" src={logo} style="height:120px; width:140px;" />
+        <p>{utcTime}</p>
+        <button on:click={loginWithGoogle}>Log in</button>
       {:else}
         you are logged in!
       {/if}
@@ -78,114 +97,185 @@
           style="flex-direction:row; justify-content: space-between; align-items:center; padding:0.5rem; gap:0.5rem;"
         >
           <div class="testCard">
-            <img style="height:100px; width:100px;" />1.Select a summoner and
-            place a bet on them winning their next match.
+            <img
+              alt="Forms being filled"
+              style="height:100px; width:100px;"
+            />1.Select a summoner and place a bet on them winning their next
+            match.
           </div>
           <div class="testCard">
-            <img style="height:100px; width:100px;" />2.Play/watch the match.
-            Winners double their points.
+            <img
+              alt="Guy playing on PC"
+              style="height:100px; width:100px;"
+            />2.Play/watch the match. Winners double their points.
           </div>
           <div class="testCard">
-            <img style="height:100px; width:100px;" />3.Top 3 of the week get a
-            free skin
+            <img
+              alt="Champions podium"
+              style="height:100px; width:100px;"
+            />3.Top 3 of the week get a free skin
           </div>
           <div class="testCard">
-            <img style="height:100px; width:100px;" />4.Points refresh every
-            day!
+            <img alt="Hourglass" style="height:100px; width:100px;" />4.Points
+            refresh every day!
           </div>
         </div>
 
         <div
-          class="summoningRow2"
-          style="background-color: var(--blue5);  align-items:center;"
+          id="summoningRow2"
+          style="background-color: var(--blue5); flex-direction:row; padding:.5rem; gap:.5rem; "
         >
-          <p style="font-size:1.8rem;">Select a summoner:</p>
-          <div style="flex-direction: row; align-items:center;">
-            <input
-              type="text"
-              bind:value={summonerName}
-              placeholder="Summoner Name"
-            />
-          </div>
-          <div style="flex-direction: row; align-items:center;">
-            <select
-              name="region"
-              id="regionSelector"
-              placeholder="summonerRegion"
-              bind:value={summonerRegion}
+          <div style="align-items:center; flex:1;">
+            <p style="font-size:1.7rem;">Select a summoner:</p>
+            <div style="flex-direction: row; align-items:center;">
+              <input
+                id="nameInputField"
+                type="text"
+                bind:value={summonerName}
+                disabled={summonerSearchDisable}
+                placeholder="Summoner Name"
+              />
+            </div>
+            <div style="flex-direction: row; align-items:center;">
+              <select
+                name="region"
+                id="regionInputField"
+                placeholder="summonerRegion"
+                bind:value={summonerRegion}
+                disabled={summonerSearchDisable}
+              >
+                <option value="na">North America</option>
+                <option value="lan">Latin America North</option>
+                <option value="las">Latin America South</option>
+                <option value="br">Brazil</option>
+                <option value="euw">Europe West</option>
+                <option value="eune">Europe Nordic & East</option>
+                <option value="ru">Russia</option>
+                <option value="tr">Turkey</option>
+                <option value="me">Middle East</option>
+                <option value="oce">Oceania</option>
+                <option value="jp">Japan</option>
+                <option value="kr">Republic of Korea</option>
+                <option value="ph">The Philippines </option>
+                <option value="sg">Singapore, Malaysia, & Indonesia</option>
+                <option value="tw">Taiwan, Hong Kong, and Macao </option>
+                <option value="th">Thailand</option>
+                <option value="vn">Vietnam</option>
+              </select>
+            </div>
+            <div style="flex-direction: row; align-items:center;">
+              <input
+                id="tagInputField"
+                type="text"
+                bind:value={summonerTag}
+                disabled={summonerSearchDisable}
+                placeholder="Summoner Tag"
+              />
+            </div>
+
+            <div
+              style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
             >
-              <option value="na">North America</option>
-              <option value="lan">Latin America North</option>
-              <option value="las">Latin America South</option>
-              <option value="br">Brazil</option>
-              <option value="euw">Europe West</option>
-              <option value="eune">Europe Nordic & East</option>
-              <option value="ru">Russia</option>
-              <option value="tr">Turkey</option>
-              <option value="me">Middle East</option>
-              <option value="oce">Oceania</option>
-              <option value="jp">Japan</option>
-              <option value="kr">Republic of Korea</option>
-              <option value="ph">The Philippines </option>
-              <option value="sg">Singapore, Malaysia, & Indonesia</option>
-              <option value="tw">Taiwan, Hong Kong, and Macao </option>
-              <option value="th">Thailand</option>
-              <option value="vn">Vietnam</option>
-            </select>
-          </div>
-          <div style="flex-direction: row; align-items:center;">
-            <input
-              type="text"
-              bind:value={summonerTag}
-              placeholder="Summoner Tag"
-            />
+              <button
+                disabled={summonerSearchDisable}
+                id="summonerSearchFunctionButton"
+                style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center; gap:1rem; bottom-margin:100px;"
+                on:click={() => {
+                  console.log(mergedURL);
+                  const spinnerDOMID = document.getElementById("spinner");
+                  spinnerDOMID.style.display = "block";
+                  getSummonerData({ text: mergedURL }).then((result) => {
+                    if (result.data !== "Unable to locate summoner.") {
+                      lastSummonerData = result.data;
+                      console.log(lastSummonerData);
+                      const lightDOMID =
+                        document.getElementById("indicatorLight");
+                      const summonerButtonText =
+                        document.getElementById("summonerButtonText");
+                      const summonerSearchBG =
+                        document.getElementById("summoningRow2");
+                      const betPlaceBG = document.getElementById("betPlaceBG");
+
+                      summonerButtonText.innerText = "Summoner Found";
+                      lightDOMID.style.backgroundColor = "green";
+                      spinnerDOMID.style.display = "none";
+
+                      summonerSearchBG.style.backgroundColor = "#1E2328";
+                      betPlaceBG.style.backgroundColor = "#0A323C";
+
+                      summonerSearchDisable = true;
+                    } else {
+                      spinnerDOMID.style.display = "none";
+                      alert("Unable to locate summoner.");
+                    }
+                  });
+                }}
+              >
+                <p id="summonerButtonText" style="margin:0px;">
+                  Verify Summoner
+                </p>
+                <div
+                  id="indicatorLight"
+                  style="background-color:red; width:10px; height:10px; border-radius:5px; flex-direction:column; "
+                >
+                  <span
+                    style="display: none; height:30px; width:30px;"
+                    id="spinner"
+                    class="loader"
+                  ></span>
+                </div>
+              </button>
+            </div>
+            <br />
           </div>
 
           <div
-            style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
+            id="betPlaceBG"
+            style="align-items:center; background-color:var(--grey4) ; flex:1;"
           >
-            <button
-              style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center; gap:1rem;"
-              on:click={() => {
-                console.log(mergedURL)
-                const element = document.getElementById("spinner");
-                element.style.display = "flex";
-                getSummonerData({ text: mergedURL }).then((result) => {
-                  /** @type {any} */
-                  lastSummonerData = result.data;
-                  console.log(lastSummonerData);
-                });
-              }}
-            >
-              <p style="margin:0px;">Verify Summoner</p>
-              <div
-                style="background-color:red; width:10px; height:10px; border-radius:100px; flex-direction:column; "
-              >
-                <span style="display: none; height:30px; width:30px;" id="spinner" class="loader"></span>
-              </div>
-            </button>
-            <!-- <p>
-              <a
-                target="_blank"
-                href="https://www.leagueofgraphs.com/summoner/{summonerRegion}/{summonerNameWithSpaces}-{summonerTag}"
-                >Summoner Not found</a
-              >
-            </p> -->
+            <p style="font-size:1.7rem;">Bet on the next match:</p>
+            <input
+              type="number"
+              placeholder="Bet amount"
+              disabled={!summonerSearchDisable}
+            />
+            <br />
+            <button disabled={!summonerSearchDisable}>Submit Bet</button>
+            <br />
           </div>
-          <input type="number" placeholder="Bet amount" />
-          <br />
-          <button disabled>Submit Bet</button>
-          <br />
         </div>
 
-        <div id="BetHistoryBox">
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
-          <div id="BetHistoryLog">bet history</div>
+        <div id="BetHistoryBox3" style="height:100%; padding:.5rem; gap:.5rem;">
+          <div
+            style="background-color: blue; width:100%; height:60px; border:solid 1px gold; justify-content:center; align-items:center;"
+          >
+            <p style="font-size:1.7rem; ">Bet History</p>
+          </div>
+          <div
+            style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
+          >
+            <div >User</div>
+            <div>9/10/2024</div>
+            <div>+2000</div>
+            <div>Victory</div>
+          </div>
+          <div
+            style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
+          >
+            <div>User</div>
+            <div>9/9/2024</div>
+            <div>0</div>
+            <div>Remake</div>
+          </div>
+
+          <div
+            style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
+          >
+            <div>User</div>
+            <div>9/8/2024</div>
+            <div>-1000</div>
+            <div>loss</div>
+          </div>
         </div>
         <div class="betHistoryRow3"></div>
       {:else if midStatus === "contact"}
@@ -195,10 +285,27 @@
       {/if}
     </div>
 
-    <div class="right">
-      LeaderBoard / Todo: <br />1. Finish setting up serveside function for
-      scraping last match data <br />2. Pass data from scrape to firestore
-      document. <br />3.
+    <div class="right" style="height:100%; gap: .5rem; padding:.5rem;">
+      <div
+        style="background-color: blue; width:100%; height:60px; border:solid 1px gold; justify-content:center; align-items:center;"
+      >
+        <p style="font-size:1.7rem; ">Leaderboard</p>
+      </div>
+      <div
+        style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
+      >
+        <div>#1</div>
+        <div>User</div>
+        <div>5000</div>
+      </div>
+
+      <div
+        style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
+      >
+        <div>#2</div>
+        <div>User</div>
+        <div>4500</div>
+      </div>
     </div>
 
     <div

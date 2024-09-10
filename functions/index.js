@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-exports.getSummonerData = onCall({ memory: '2GiB', timeoutSeconds: 2000 }, async (request) => {
+exports.getSummonerData = onCall({ memory: '4GiB', timeoutSeconds: 2000 }, async (request) => {
   try {
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -26,6 +26,6 @@ exports.getSummonerData = onCall({ memory: '2GiB', timeoutSeconds: 2000 }, async
     return { title: pageTitle, lastgameResult: gameResultText, lastMatchTimestamp: gameTimestampText};
   } catch (error) {
 
-    return ("Unable to locate summoner");
+    return ("Unable to locate summoner.");
   }
 });
