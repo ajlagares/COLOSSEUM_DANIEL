@@ -2,10 +2,27 @@
   //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   //Import firebase code
   import { initializeApp } from "firebase/app";
-  import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut 
+  } from "firebase/auth";
+  import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    doc,
+    updateDoc,
+  } from "firebase/firestore";
   import { getFunctions, httpsCallable } from "firebase/functions";
-  import logo from "./assets/colosseumLogo.svg";
+
   import { onMount } from "svelte";
+
+  import logo from "./assets/colosseumLogo.svg";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCcUIXPORf5C_PEDsTYPadaTgGtzSky7kY",
@@ -21,10 +38,10 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   const functions = getFunctions(app);
-  const getSummonerData = httpsCallable(functions, "getSummonerData");
-  let lastSummonerData = null;
+
   let user = null;
 
+  // Sign in with google
   async function loginWithGoogle() {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -34,9 +51,36 @@
       console.error("Error during sign-in:", error);
     }
   }
+  async function logout() {
+    try {
+      await signOut(auth);
+      console.log("User signed out successfully");
+      // Additional logic after sign-out (e.g., redirecting the user)
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  }
+
+  //Handle user state already logged in
+  onMount(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        user = currentUser;
+        console.log("User is already logged in:", user);
+        // Perform any additional setup with the authenticated user
+      } else {
+        user = null;
+        console.log("No user is logged in");
+      }
+    });
+  });
+
+  //when a bet is placed update user document
+
   //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   let utcTime = "";
-
+  const getSummonerData = httpsCallable(functions, "getSummonerData");
+  let lastSummonerData = null;
   let summonerName = "";
   $: summonerNameWithSpaces = summonerName.replace(/ /g, "%20");
   let summonerRegion = "";
@@ -83,10 +127,12 @@
     >
       {#if user === null}
         <img alt="Logo" src={logo} style="height:120px; width:140px;" />
-        <p>{utcTime}</p>
         <button on:click={loginWithGoogle}>Log in</button>
       {:else}
-        you are logged in!
+        <img alt="Logo" src={logo} style="height:120px; width:140px;" />
+        <p>{utcTime}</p>
+        <p>Signed in under: {user.email}</p>
+        <button on:click={logout}>Log out</button>
       {/if}
     </div>
 
@@ -127,52 +173,51 @@
         >
           <div style="align-items:center; flex:1;">
             <p style="font-size:1.7rem;">Select a summoner:</p>
-            <div style="flex-direction: row; align-items:center;">
-              <input
-                id="nameInputField"
-                type="text"
-                bind:value={summonerName}
-                disabled={summonerSearchDisable}
-                placeholder="Summoner Name"
-              />
-            </div>
-            <div style="flex-direction: row; align-items:center;">
-              <select
-                name="region"
-                id="regionInputField"
-                placeholder="summonerRegion"
-                bind:value={summonerRegion}
-                disabled={summonerSearchDisable}
-              >
-                <option value="na">North America</option>
-                <option value="lan">Latin America North</option>
-                <option value="las">Latin America South</option>
-                <option value="br">Brazil</option>
-                <option value="euw">Europe West</option>
-                <option value="eune">Europe Nordic & East</option>
-                <option value="ru">Russia</option>
-                <option value="tr">Turkey</option>
-                <option value="me">Middle East</option>
-                <option value="oce">Oceania</option>
-                <option value="jp">Japan</option>
-                <option value="kr">Republic of Korea</option>
-                <option value="ph">The Philippines </option>
-                <option value="sg">Singapore, Malaysia, & Indonesia</option>
-                <option value="tw">Taiwan, Hong Kong, and Macao </option>
-                <option value="th">Thailand</option>
-                <option value="vn">Vietnam</option>
-              </select>
-            </div>
-            <div style="flex-direction: row; align-items:center;">
-              <input
-                id="tagInputField"
-                type="text"
-                bind:value={summonerTag}
-                disabled={summonerSearchDisable}
-                placeholder="Summoner Tag"
-              />
-            </div>
+            <input
+              id="nameInputField"
+              type="text"
+              bind:value={summonerName}
+              disabled={summonerSearchDisable}
+              placeholder="Summoner Name"
+            />
+            <select
+              name="region"
+              id="regionInputField"
+              placeholder="summonerRegion"
+              bind:value={summonerRegion}
+              disabled={summonerSearchDisable}
+            >
+              <option value="na">North America</option>
+              <option value="lan">Latin America North</option>
+              <option value="las">Latin America South</option>
+              <option value="br">Brazil</option>
+              <option value="euw">Europe West</option>
+              <option value="eune">Europe Nordic & East</option>
+              <option value="ru">Russia</option>
+              <option value="tr">Turkey</option>
+              <option value="me">Middle East</option>
+              <option value="oce">Oceania</option>
+              <option value="jp">Japan</option>
+              <option value="kr">Republic of Korea</option>
+              <option value="ph">The Philippines </option>
+              <option value="sg">Singapore, Malaysia, & Indonesia</option>
+              <option value="tw">Taiwan, Hong Kong, and Macao </option>
+              <option value="th">Thailand</option>
+              <option value="vn">Vietnam</option>
+            </select>
+            <input
+              id="tagInputField"
+              type="text"
+              bind:value={summonerTag}
+              disabled={summonerSearchDisable}
+              placeholder="Summoner Tag"
+            />
 
+            <input
+              type="number"
+              placeholder="Bet amount"
+              disabled={summonerSearchDisable}
+            />
             <div
               style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
             >
@@ -228,21 +273,6 @@
             </div>
             <br />
           </div>
-
-          <div
-            id="betPlaceBG"
-            style="align-items:center; background-color:var(--grey4) ; flex:1;"
-          >
-            <p style="font-size:1.7rem;">Bet on the next match:</p>
-            <input
-              type="number"
-              placeholder="Bet amount"
-              disabled={!summonerSearchDisable}
-            />
-            <br />
-            <button disabled={!summonerSearchDisable}>Submit Bet</button>
-            <br />
-          </div>
         </div>
 
         <div id="BetHistoryBox3" style="height:100%; padding:.5rem; gap:.5rem;">
@@ -254,27 +284,27 @@
           <div
             style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
           >
-            <div >User</div>
-            <div>9/10/2024</div>
-            <div>+2000</div>
-            <div>Victory</div>
+            <div style="flex:3">asdgfafwefawefwefaweffaefwaef</div>
+            <div style="flex:1; text-align: right;">10 Sept 2024</div>
+            <div style="flex:1; text-align: right;">+2000</div>
+            <div style="flex:1; text-align: right;">Victory</div>
           </div>
           <div
             style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
           >
-            <div>User</div>
-            <div>9/9/2024</div>
-            <div>0</div>
-            <div>Remake</div>
+            <div style="flex:3; ">User</div>
+            <div style="flex:1; text-align: right;">9 Sept 2024</div>
+            <div style="flex:1; text-align: right;">0</div>
+            <div style="flex:1; text-align: right;">Remake</div>
           </div>
 
           <div
             style="flex-direction:row; justify-content:space-between; background-color: var(--blue4); width:100%; padding:1rem;"
           >
-            <div>User</div>
-            <div>9/8/2024</div>
-            <div>-1000</div>
-            <div>loss</div>
+            <div style="flex:3; ">User</div>
+            <div style="flex:1; text-align: right;">8 Sept 2024</div>
+            <div style="flex:1; text-align: right;">-1000</div>
+            <div style="flex:1; text-align: right;">loss</div>
           </div>
         </div>
         <div class="betHistoryRow3"></div>

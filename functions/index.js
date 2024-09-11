@@ -23,9 +23,28 @@ exports.getSummonerData = onCall({ memory: '4GiB', timeoutSeconds: 2000 }, async
     const gameResultText = await page.evaluate(el => el.textContent, gameResult);
 
     await browser.close();
-    return { title: pageTitle, lastgameResult: gameResultText, lastMatchTimestamp: gameTimestampText};
+    return { title: pageTitle, lastgameResult: gameResultText, lastMatchTimestamp: gameTimestampText };
   } catch (error) {
-
     return ("Unable to locate summoner.");
   }
+});
+
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+exports.createUser=functions.auth.user().onCreate((user) => {
+  // Get a reference to the Firestore database
+  const db = admin.firestore();
+
+  // Create a new document in the 'users' collection
+  const userRef = db.collection('users').doc(user.uid);
+
+  // Set the document data
+  return userRef.set({
+    displayName: user.displayName,
+    email: user.email,
+    photoURL: user.photoURL,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
 });
