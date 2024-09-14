@@ -1,13 +1,12 @@
 <script>
   //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-  //Import firebase code
   import { initializeApp } from "firebase/app";
   import {
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
     onAuthStateChanged,
-    signOut 
+    signOut,
   } from "firebase/auth";
   import {
     getFirestore,
@@ -18,6 +17,7 @@
     doc,
     updateDoc,
   } from "firebase/firestore";
+
   import { getFunctions, httpsCallable } from "firebase/functions";
 
   import { onMount } from "svelte";
@@ -60,8 +60,7 @@
       console.error("Error signing out:", error);
     }
   }
-
-  //Handle user state already logged in
+  //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   onMount(() => {
     onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -73,29 +72,30 @@
         console.log("No user is logged in");
       }
     });
+
+    updateUTCTime(); // Initial call to display immediately
+    // Update the time every 50 milliseconds for smooth display of ms
+    const interval = setInterval(updateUTCTime, 50);
+
+    // Cleanup function to clear the interval when the component is destroyed
+    return () => clearInterval(interval);
   });
 
-  //when a bet is placed update user document
-
-  //🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   let utcTime = "";
-  const getSummonerData = httpsCallable(functions, "getSummonerData");
   let lastSummonerData = null;
-  let summonerName = "";
-  $: summonerNameWithSpaces = summonerName.replace(/ /g, "%20");
+
   let summonerRegion = "";
+  let summonerName = "";
   let summonerTag = "";
-  let midStatus = "normal";
-  let summonerSearchDisable = false;
+  $: summonerNameWithoutSpaces = summonerName.replace(/\s+/g, "");
+
   $: mergedURL =
     "https://www.leagueofgraphs.com/summoner/" +
     summonerRegion +
     "/" +
-    summonerNameWithSpaces +
+    summonerNameWithoutSpaces +
     "-" +
     summonerTag;
-
-  //https://scrapedata-xxvante5sa-uc.a.run.app/
 
   function updateUTCTime() {
     const now = new Date();
@@ -109,14 +109,11 @@
     utcTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
 
-  onMount(() => {
-    updateUTCTime(); // Initial call to display immediately
-    // Update the time every 50 milliseconds for smooth display of ms
-    const interval = setInterval(updateUTCTime, 50);
-
-    // Cleanup function to clear the interval when the component is destroyed
-    return () => clearInterval(interval);
-  });
+  let midStatus = "normal";
+  let betButtonText = "Place Your Bet";
+  let spinnerDisplay = "none";
+  let indicatorLight = "red";
+  
 </script>
 
 <main>
@@ -169,110 +166,89 @@
 
         <div
           id="summoningRow2"
-          style="background-color: var(--blue5); flex-direction:row; padding:.5rem; gap:.5rem; "
+          style="background-color: var(--blue5); padding:.5rem; gap:.5rem; align-items:center; "
         >
-          <div style="align-items:center; flex:1;">
-            <p style="font-size:1.7rem;">Select a summoner:</p>
-            <input
-              id="nameInputField"
-              type="text"
-              bind:value={summonerName}
-              disabled={summonerSearchDisable}
-              placeholder="Summoner Name"
-            />
-            <select
-              name="region"
-              id="regionInputField"
-              placeholder="summonerRegion"
-              bind:value={summonerRegion}
-              disabled={summonerSearchDisable}
-            >
-              <option value="na">North America</option>
-              <option value="lan">Latin America North</option>
-              <option value="las">Latin America South</option>
-              <option value="br">Brazil</option>
-              <option value="euw">Europe West</option>
-              <option value="eune">Europe Nordic & East</option>
-              <option value="ru">Russia</option>
-              <option value="tr">Turkey</option>
-              <option value="me">Middle East</option>
-              <option value="oce">Oceania</option>
-              <option value="jp">Japan</option>
-              <option value="kr">Republic of Korea</option>
-              <option value="ph">The Philippines </option>
-              <option value="sg">Singapore, Malaysia, & Indonesia</option>
-              <option value="tw">Taiwan, Hong Kong, and Macao </option>
-              <option value="th">Thailand</option>
-              <option value="vn">Vietnam</option>
-            </select>
-            <input
-              id="tagInputField"
-              type="text"
-              bind:value={summonerTag}
-              disabled={summonerSearchDisable}
-              placeholder="Summoner Tag"
-            />
+          <p style="font-size:1.7rem;">Select a summoner:</p>
+          <input
+            id="nameInputField"
+            type="text"
+            bind:value={summonerName}
+            placeholder="Summoner Name"
+          />
+          <select
+            name="region"
+            id="regionInputField"
+            placeholder="summonerRegion"
+            bind:value={summonerRegion}
+          >
+            <option value="na">North America</option>
+            <option value="lan">Latin America North</option>
+            <option value="las">Latin America South</option>
+            <option value="br">Brazil</option>
+            <option value="euw">Europe West</option>
+            <option value="eune">Europe Nordic & East</option>
+            <option value="ru">Russia</option>
+            <option value="tr">Turkey</option>
+            <option value="me">Middle East</option>
+            <option value="oce">Oceania</option>
+            <option value="jp">Japan</option>
+            <option value="kr">Republic of Korea</option>
+            <option value="ph">The Philippines </option>
+            <option value="sg">Singapore, Malaysia, & Indonesia</option>
+            <option value="tw">Taiwan, Hong Kong, and Macao </option>
+            <option value="th">Thailand</option>
+            <option value="vn">Vietnam</option>
+          </select>
+          <input
+            id="tagInputField"
+            type="text"
+            bind:value={summonerTag}
+            placeholder="Summoner Tag"
+          />
 
-            <input
-              type="number"
-              placeholder="Bet amount"
-              disabled={summonerSearchDisable}
-            />
+          <input type="number" placeholder="Bet amount" />
+
+          <button
+            id="summonerSearchFunctionButton"
+            style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center; gap:1rem; bottom-margin:100px;"
+            on:click={async () => {
+              console.log(mergedURL);
+              spinnerDisplay = "block";
+              betButtonText = "Finding Summoner";
+              await fetch("https://scrapesummonerdata-xxvante5sa-uc.a.run.app", {
+                method: "POST",
+                headers: {
+                  "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({ data: mergedURL })}).then(async (response) => {
+                  let data = await response.json()
+                  console.log(data);
+
+                // if (response.data !==  "Unable to locate summoner." ) {
+                //   console.log(lastSummonerData);
+                //   indicatorLight = "green";
+                //   spinnerDisplay = "none";
+                //   betButtonText = "Awaiting Result...";
+                // } else {
+                //   betButtonText = "Place a bet";
+                //   spinnerDisplay = "none";
+                //   alert("Unable to locate summoner.");
+                // }
+              });
+            }}
+          >
+            <p id="summonerButtonText" style="margin:0px;">{betButtonText}</p>
             <div
-              style="flex-direction: row; align-items:center; margin:0.5rem; gap:0.5rem;"
+              style="background-color:{indicatorLight}; width:10px; height:10px; border-radius:5px; flex-direction:column; "
             >
-              <button
-                disabled={summonerSearchDisable}
-                id="summonerSearchFunctionButton"
-                style="width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center; gap:1rem; bottom-margin:100px;"
-                on:click={() => {
-                  console.log(mergedURL);
-                  const spinnerDOMID = document.getElementById("spinner");
-                  spinnerDOMID.style.display = "block";
-                  getSummonerData({ text: mergedURL }).then((result) => {
-                    if (result.data !== "Unable to locate summoner.") {
-                      lastSummonerData = result.data;
-                      console.log(lastSummonerData);
-                      const lightDOMID =
-                        document.getElementById("indicatorLight");
-                      const summonerButtonText =
-                        document.getElementById("summonerButtonText");
-                      const summonerSearchBG =
-                        document.getElementById("summoningRow2");
-                      const betPlaceBG = document.getElementById("betPlaceBG");
-
-                      summonerButtonText.innerText = "Summoner Found";
-                      lightDOMID.style.backgroundColor = "green";
-                      spinnerDOMID.style.display = "none";
-
-                      summonerSearchBG.style.backgroundColor = "#1E2328";
-                      betPlaceBG.style.backgroundColor = "#0A323C";
-
-                      summonerSearchDisable = true;
-                    } else {
-                      spinnerDOMID.style.display = "none";
-                      alert("Unable to locate summoner.");
-                    }
-                  });
-                }}
-              >
-                <p id="summonerButtonText" style="margin:0px;">
-                  Verify Summoner
-                </p>
-                <div
-                  id="indicatorLight"
-                  style="background-color:red; width:10px; height:10px; border-radius:5px; flex-direction:column; "
-                >
-                  <span
-                    style="display: none; height:30px; width:30px;"
-                    id="spinner"
-                    class="loader"
-                  ></span>
-                </div>
-              </button>
+              <span
+                style="display:{spinnerDisplay}; height:30px; width:30px;"
+                id="spinner"
+                class="loader"
+              ></span>
             </div>
-            <br />
-          </div>
+          </button>
+          <br />
         </div>
 
         <div id="BetHistoryBox3" style="height:100%; padding:.5rem; gap:.5rem;">
@@ -307,7 +283,6 @@
             <div style="flex:1; text-align: right;">loss</div>
           </div>
         </div>
-        <div class="betHistoryRow3"></div>
       {:else if midStatus === "contact"}
         hey here is my email
       {:else if midStatus === "about"}
